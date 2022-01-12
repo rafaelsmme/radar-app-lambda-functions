@@ -18,11 +18,11 @@ exports.handler = async (event, context) => {
   };
 
   try {
-    const data = await documentClient.delete(params).promise();
-    body = JSON.stringify(data);
-    statusCode = 204;
+    const data = await documentClient.get(params).promise();
+    body = JSON.stringify(data.Item);
+    statusCode = 200;
   } catch (err) {
-    body = `Unable to delete task: ${err}`;
+    body = `Unable to load task: ${err}`;
     statusCode = 403;
   }
 

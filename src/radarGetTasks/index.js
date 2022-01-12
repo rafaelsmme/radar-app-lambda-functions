@@ -14,7 +14,11 @@ exports.handler = async (event, context) => {
 
   try {
     const data = await documentClient.scan(params).promise();
-    body = JSON.stringify(data.Items);
+    const sorted = data.Items.sort(
+      (taskA, taskB) =>
+        new Date(taskA.next).getTime() - new Date(taskB.next).getTime()
+    );
+    body = JSON.stringify(sorted);
     statusCode = 200;
   } catch (err) {
     body = `Unable to get tasks: ${err}`;
@@ -25,6 +29,7 @@ exports.handler = async (event, context) => {
     statusCode,
     headers: {
       "Content-Type": "application/json",
+      "access-control-allow-origin": "*",
     },
     body,
   };

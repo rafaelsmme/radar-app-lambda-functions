@@ -44,6 +44,7 @@ exports.handler = async (event, context) => {
     statusCode,
     headers: {
       "Content-Type": "application/json",
+      "access-control-allow-origin": "*",
     },
     body,
   };
