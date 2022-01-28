@@ -47,7 +47,7 @@ exports.handler = async (event, context) => {
 
   try {
     emailParams.Message.Body.Text.Data = body;
-    ses.sendEmail(params).promise();
+    ses.sendEmail(emailParams).promise();
   } catch (err) {
     body = `Unable to send notification email: ${err}`;
     statusCode = 403;
