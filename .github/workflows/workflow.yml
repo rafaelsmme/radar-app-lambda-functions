@@ -25,8 +25,10 @@ jobs:
           zip -j deployGetTasks ./src/radarGetTasks/index.js
           zip -j deployGetTask ./src/radarGetTask/index.js
           zip -j deployUpdateTask ./src/radarUpdateTask/index.js
+          zip -j deploySchedulerTask ./src/radarNotificationScheduler/index.js
           aws lambda update-function-code --function-name=radarAddTask --zip-file=fileb://deployAddTask.zip
           aws lambda update-function-code --function-name=radarDeleteTask --zip-file=fileb://deployDeleteTask.zip
           aws lambda update-function-code --function-name=radarGetTasks --zip-file=fileb://deployGetTasks.zip
           aws lambda update-function-code --function-name=radarGetTask --zip-file=fileb://deployGetTask.zip
           aws lambda update-function-code --function-name=radarUpdateTask --zip-file=fileb://deployUpdateTask.zip
+          aws lambda update-function-code --function-name=radarNotificationScheduler --zip-file=fileb://deploySchedulerTask.zip
