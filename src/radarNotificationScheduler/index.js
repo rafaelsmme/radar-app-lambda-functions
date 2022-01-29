@@ -8,6 +8,7 @@ exports.handler = async (event, context) => {
 
   let body = "";
   let statusCode = 0;
+  let filtered = [];
   const sevenDays = 1000 * 60 * 60 * 24 * 7;
 
   const dbParams = {
@@ -18,19 +19,14 @@ exports.handler = async (event, context) => {
     Destination: {
       ToAddresses: [process.env.RECIPIENT],
     },
-    Message: {
-      Body: {
-        Text: { Data: "" },
-      },
-
-      Subject: { Data: "Tasks for the week" },
-    },
     Source: "radar@rafaelsm.me",
+    Template: "radarTasks",
+    TemplateData: "",
   };
 
   try {
     const data = await documentClient.scan(dbParams).promise();
-    const filtered = data.Items.filter((task) => {
+    filtered = data.Items.filter((task) => {
       const nextWeek = Date.now() + sevenDays;
       const nextExec = new Date(task.next).getTime();
       return nextExec < nextWeek;
@@ -46,8 +42,27 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    emailParams.Message.Body.Text.Data = body;
-    ses.sendEmail(emailParams).promise();
+    const formattedTasks = filtered.map((task) => {
+      const nextFormattedDate = new Date(task.next).toLocaleDateString(
+        "en-AU",
+        {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+        }
+      );
+      return `${task.label} - ${nextFormattedDate}`;
+    });
+    const tasksString = formattedTasks
+      .map((task) => `<li>${task}</li>`)
+      .join("");
+    const tasksRawString = formattedTasks.map((task) => `/n${task}`).join("");
+    body = tasksString + "/n" + tasksRawString;
+    emailParams.TemplateData = `{"tasks":"${tasksString}", "tasksRaw":"${tasksRawString}", "date":"${new Date().toLocaleDateString(
+      "en-AU",
+      { month: "numeric", day: "numeric", year: "numeric" }
+    )}"}`;
+    await ses.sendTemplatedEmail(emailParams).promise();
   } catch (err) {
     body = `Unable to send notification email: ${err}`;
     statusCode = 403;
